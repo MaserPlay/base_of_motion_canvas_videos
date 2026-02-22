@@ -1,2 +1,6 @@
-# base_of_motion_canvas_videos
-Base of all my motion_canvas video
+This is base of all my [motion_canvas](https://archive.canvascommons.io/) videos .
+
+
+My YT : https://youtube.com/@maserplaych
+
+My telegram channel : https://t.me/maserplaytg
