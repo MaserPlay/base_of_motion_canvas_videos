@@ -51,6 +51,14 @@ export function getRandomElement<T>(array: T[], random?: Random): T {
     return array[randomIndex];
 }
 
+export function randomMix<T>(array: T[], random?: Random): T[] {
+    if (random) {
+        return array.sort(() => random.nextInt(-1, 1))
+    } else {
+        return [...array].sort(() => Math.random() - 0.5);
+    }
+}
+
 export const AverageColor = new FastAverageColor()
 
 export function* getAverageColorAsync(url : string)
@@ -74,9 +82,8 @@ export const ResourceUrls = {
     maserplayIco: "https://avatars.githubusercontent.com/u/88372261?v=4",
     dadIco: "https://gitlab.m2023.ru/uploads/-/system/user/avatar/1/avatar.png?width=400"
 }
-export function onlyReference(view: View2D, props?: TxtProps) {
+export function remark(view: View2D, props?: TxtProps) {
     return new Txt({
-        text: "Демонстрация только для примера, реализация может отличаться!",
         fill: BrandColors.Secondary,
         topRight: () => [view.middle().x, -view.middle().y],
         fontSize: 30,
@@ -114,4 +121,18 @@ export function* shaking(intensity: number, component: Reference<Node>, duration
     
     // Возвращаем в исходное положение
     yield* component().position(originalPosition, shakeDuration);
+}
+/**
+ * Циклически "оборачивает" значение в диапазон [min, max)
+ * Аналог fmod, но корректно работает с отрицательными числами.
+ * 
+ * Примеры:
+ * wrap(7, 0, 5) → 2
+ * wrap(-1, 0, 5) → 4
+ * wrap(12.3, 10, 15) → 12.3
+ * wrap(25, 10, 15) → 10 + (25 - 10) % (15 - 10) = 10 + 15 % 5 = 10
+ */
+export function wrap(value: number, min: number, max: number): number {
+    const range = (max) - min;
+    return ((value - min) % range + range) % range + min;
 }

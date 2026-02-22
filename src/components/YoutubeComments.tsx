@@ -52,7 +52,7 @@ export class YoutubeComments extends Rect {
                         margin={10}
                     />
                     <Txt
-                        text={() => insertLineBreaksPreserveWords(c, 30)}
+                        text={() => insertLineBreaksPreserveWords(c, 30, true)}
                     />
                 </Layout>
             ))

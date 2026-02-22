@@ -16,8 +16,19 @@ export function BackgroundVoronoi(props: ImgProps) {
         </>
     )
 }
+
+declare module "@motion-canvas/2d" {
+  interface View2D {
+    addBackgroundVoronoi(props?: ImgProps): void;
+  }
+}
+
 export function addBackgroundVoronoi(view: View2D, props: ImgProps = {})
 {
     view.fill(BrandColors.Background)
     view.add(<BackgroundVoronoi {...props}/>)
+}
+
+View2D.prototype.addBackgroundVoronoi = function (props: ImgProps = {}) {
+    addBackgroundVoronoi(this, props)
 }

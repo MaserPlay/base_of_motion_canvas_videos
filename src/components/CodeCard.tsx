@@ -1,10 +1,10 @@
-import { Code, CodeHighlighter, codeSignal, CodeSignal, defaultStyle, initial, Rect, RectProps, signal } from "@motion-canvas/2d";
+import { Code, CodeHighlighter, codeSignal, CodeSignal, defaultStyle, initial, PossibleCodeScope, Rect, RectProps, signal } from "@motion-canvas/2d";
 import { SignalValue, SimpleSignal } from "@motion-canvas/core";
 
 
 export interface CodeCardProps extends RectProps {
     highlighter?: SignalValue<CodeHighlighter | null>;
-    code: SignalValue<string>;
+    code: SignalValue<PossibleCodeScope>;
     codeFontSize?: SignalValue<number>;
 }
 
@@ -18,9 +18,8 @@ export class CodeCard extends Rect {
         this
     >;
 
-    @initial(20)
-    @codeSignal()
-    public declare readonly code: CodeSignal<this>;
+    @signal()
+    public declare readonly code: SimpleSignal<PossibleCodeScope, this>;
 
     @defaultStyle('font-size', parseFloat)
     @signal()
@@ -40,8 +39,8 @@ export class CodeCard extends Rect {
 
         this.add(
             <Code
-                code={props.code}
-                highlighter={props.highlighter}
+                code={this.code}
+                highlighter={this.highlighter}
                 fontSize={this.codeFontSize}
             />
         )

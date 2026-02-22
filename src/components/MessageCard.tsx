@@ -1,23 +1,32 @@
 import { Filter, filtersSignal, FiltersSignal, Img, initial, invert, Layout, LayoutProps, PossibleCanvasStyle, Rect, signal, Txt } from "@motion-canvas/2d";
-import { createSignal, SignalValue, SimpleSignal, useRandom } from "@motion-canvas/core";
+import { createDeferredEffect, createEffect, createRef, range, SignalValue, SimpleSignal, unwrap, useLogger, useRandom } from "@motion-canvas/core";
 
 import { BrandColors, getRandomElement, ResourceUrls } from "../global"
+
+export type Reactions = Map<string, number> | [string, number][]
 
 export interface MessageCardProps extends LayoutProps {
     text: SignalValue<string>;
     author?: SignalValue<string>;
     image?: SignalValue<string>;
+    addImage?: SignalValue<string>;
+    addImageOpacity?: SignalValue<number>;
     fill?: SignalValue<PossibleCanvasStyle>
     authorNicknameColor?: SignalValue<PossibleCanvasStyle>
     lineLenght?: SignalValue<number>
     imageFilters?: SignalValue<Filter[]>
     side?: SignalValue<MessageCard_Side>
+    inline?: SignalValue<string>
+    reactions?: SignalValue<Reactions>
 }
 
-let authorsColor = new Map<string, PossibleCanvasStyle>()
+let authorsColor = new Map<string, string>()
 export enum MessageCard_Side {
   Left,
   Right,
+}
+function reactionsToMap(react:Reactions): Map<string, number> {
+    return react instanceof Map ? react : new Map(react)
 }
 
 export class MessageCard extends Layout {
@@ -37,9 +46,25 @@ export class MessageCard extends Layout {
     @signal()
     public declare readonly author: SimpleSignal<string, this>;
 
+    @initial(new Map<string, number>())
+    @signal()
+    public declare readonly reactions: SimpleSignal<Reactions, this>;
+
+    @initial(undefined)
+    @signal()
+    public declare readonly inline: SimpleSignal<string, this>;
+
     @initial("")
     @signal()
     public declare readonly image: SimpleSignal<string, this>;
+
+    @initial("")
+    @signal()
+    public declare readonly addImage: SimpleSignal<string, this>;
+
+    @initial(1)
+    @signal()
+    public declare readonly addImageOpacity: SimpleSignal<number, this>;
 
     @filtersSignal()
     public declare readonly imageFilters: FiltersSignal<this>;
@@ -66,21 +91,26 @@ export class MessageCard extends Layout {
     static telegramAuthorsColor = (authorNickname?: string) => {
         const random = useRandom()
 
-        const colors = ["#FFFF", "#ea868f", "#75b798"]
+        const colors = ["#4f0396", "#ea868f", "#75b798", "#00a396"]
 
-        return createSignal(() => {
-            if (authorsColor.has(authorNickname))
-            {
-                return authorsColor.get(authorNickname)
-            } else {
-                const color = getRandomElement(colors, random)
-                if (!(authorNickname == undefined || authorNickname == null)) {
-                    authorsColor.set(authorNickname, color)
-                }
-                return color
+        if (authorsColor.has(authorNickname))
+        {
+            return authorsColor.get(authorNickname)
+        } else {
+            const color = getRandomElement(colors, random)
+            if (!(authorNickname == undefined || authorNickname == null)) {
+                authorsColor.set(authorNickname, color)
             }
-        })
+            return color
+        }
     } 
+
+    static authorProps = (name:string) => {
+        return {
+            author: name,
+            image: `https://ui-avatars.com/api/?background=${MessageCard.telegramAuthorsColor(name).substring(1)}&size=512&color=fff&name=${encodeURIComponent(name)}&rounded=true&format=svg`
+        };
+    }
 
     public constructor(props?: MessageCardProps) {
 
@@ -94,6 +124,7 @@ export class MessageCard extends Layout {
 
         const ffontFamily = ""
 
+        const reactionsRef = createRef<Layout>()
 
         this.add(
             <>
@@ -106,28 +137,60 @@ export class MessageCard extends Layout {
                     }}
                     filters={this.imageFilters}
                 />
-                <Rect
+                <Layout
                     layout
-                    fill={this.fill}
-                    radius={40}
                     direction={'column'}
-                    gap={40}
-                    padding={40}
+                    gap={10}
                 >
-                    <Txt
-                        text={this.author}
-                        fontFamily={ffontFamily}
-                        fill={this.authorNicknameColor()}
-                        fontSize={50}
+                    <Rect
+                        layout
+                        fill={this.fill}
+                        radius={40}
+                        direction={'column'}
+                        padding={40}
+                    >
+                        <Txt
+                            text={this.author}
+                            fontFamily={ffontFamily}
+                            fill={this.authorNicknameColor()}
+                            fontSize={50}
+                        />
+                        <Txt
+                            text={() => insertLineBreaksPreserveWords(this.text(), this.lineLenght())}
+                            lineHeight={() => this.text().trim().length == 0 ? 0 : this.lineHeight()}
+                            fontFamily={ffontFamily}
+                            fill={BrandColors.FontColor}
+                            fontSize={() => this.text().trim().length == 0 ? 0 : this.fontSize()}
+                            margin={() => this.text().trim().length == 0 ? 0 : [this.author().trim().length == 0 ? 0 : 40, 0, 0, 0]}
+                        />
+                        <Layout
+                            layout
+                            ref={reactionsRef}
+                            margin={() => reactionsToMap(this.reactions()).size == 0 ? 0 : [20, 0, 0, 0]}
+                        />
+                    </Rect>
+                    <Rect
+                        layout
+                        fill={BrandColors.Secondary + "60"}
+                        radius={40}
+                        direction={'column'}
+                        gap={40}
+                        padding={() => this.inline()?.trim()?.length > 0 ? 40 : 0}
+                    >
+                        <Txt
+                            text={this.inline}
+                            fontFamily={ffontFamily}
+                            fill={BrandColors.FontColor}
+                            fontSize={this.fontSize}
+                            textAlign={"center"}
+                        />
+                    </Rect>
+                    <Img
+                        src={this.addImage}
+                        width={300}
+                        opacity={this.addImageOpacity}
                     />
-                    <Txt
-                        text={() => insertLineBreaksPreserveWords(this.text(), this.lineLenght())}
-                        lineHeight={this.lineHeight}
-                        fontFamily={ffontFamily}
-                        fill={BrandColors.FontColor}
-                        fontSize={this.fontSize}
-                    />
-                </Rect>
+                </Layout>
                 <Img
                     src={this.image}
                     size={() => {
@@ -139,53 +202,66 @@ export class MessageCard extends Layout {
                 />
             </>
         )
+
+        createDeferredEffect(() => {
+            const reactions = reactionsToMap(this.reactions())
+            
+            const container = reactionsRef();
+            if (!container) {
+                useLogger().warn("container == null")
+                return
+            }
+
+            container.removeChildren()
+
+            reactions.forEach((count, emoji) => {
+                container.add(
+                    <Rect
+                        fill={BrandColors.Secondary}
+                        margin={10}
+                        padding={10}
+                        radius={20}
+                    >
+                        <Txt
+                            fill={BrandColors.FontColor}
+                            text={emoji + " " + count}
+                        />
+                    </Rect>
+                )
+            })
+
+        })
     }
 }
 
-export function insertLineBreaksPreserveWords(text: string, lineLengthh : number = 25): string {
+export function insertLineBreaksPreserveWords(text: string, lineLength: number = 25, transferOverflow = true): string {
     let result = '';
-    let lineLength = 0;
 
-    const words = text.trim().split(/(?=\n)|(?<=\n)/g); // Разделяем с сохранением переносов
+    for (const line of text.trim().split("\n")) {
+        let currentlineLenght = 0;
 
-    for (let word of words) {
-
-        word = word.trim()
-
-        if (word === '\n') {
-            result += word;
-            lineLength = 0;
-            continue;
-        }
-
-        if (lineLength + word.length > lineLengthh) {
-            if (lineLength > 0) {
-                result += '\n';
-                lineLength = 0;
-            }
-
-            if (word.length > lineLengthh) {
-                let remaining = word;
-                while (remaining.length > 0) {
-                    const chunk = remaining.slice(0, lineLengthh);
-                    result += chunk;
-                    remaining = remaining.slice(lineLengthh);
-
-                    if (remaining.length > 0) {
-                        result += '\n';
-                        lineLength = 0;
-                    } else {
-                        lineLength = chunk.length;
-                    }
+        for (const word of line.trim().split(" ")) {
+            if (transferOverflow && word.length > lineLength) {
+                if (currentlineLenght > 0) {
+                    result += "\n"
                 }
-            } else {
-                result += word;
-                lineLength = word.length;
+                for (let start = 0; start < word.length; start = start + lineLength) {
+                    result += word.substring(start, start + lineLength)
+                    result += "\n"
+                }
+                currentlineLenght = 0
             }
-        } else {
-            result += word;
-            lineLength += word.length;
+            else if (currentlineLenght + word.length > lineLength) {
+                result += "\n"
+                currentlineLenght = 0
+                currentlineLenght += word.length + 1
+                result += word + " "
+            } else {                
+                currentlineLenght += word.length + 1
+                result += word + " "
+            }
         }
+        result += "\n"
     }
 
     return result;

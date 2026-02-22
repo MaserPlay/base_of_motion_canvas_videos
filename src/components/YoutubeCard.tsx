@@ -1,4 +1,4 @@
-import { Img, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
+import { Img, initial, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
 import { all, chain, createRef, SignalValue, SimpleSignal } from "@motion-canvas/core";
 import { Colors } from "../global";
 
@@ -18,6 +18,9 @@ export class YoutubeCard extends Rect {
     public declare readonly channelname: SimpleSignal<string, this>;
     @signal()
     public declare readonly subCount: SimpleSignal<string, this>;
+    @initial(false)
+    @signal()
+    private declare readonly isSub: SimpleSignal<boolean, this>;
 
     readonly isSubColor = "#a1a1a1ff"
     readonly notSubColor = "#ff3535ff"
@@ -64,37 +67,40 @@ export class YoutubeCard extends Rect {
                     layout
                     radius={90}
                     padding={50}
+                    justifyContent={'center'}
+                    alignItems={'center'}
                 >
-                    <Layout
-                        ref={this.subLayout}
-                        layout
-                        justifyContent={'center'}
-                        alignItems={'center'}
-                    >
-                        <Txt
-                            ref={this.subText}
-                            text={"Подписаться"}
-                            fill={Colors.WHITE}
-                        />
-                        <Img   
-                            ref={this.bell}
-                            src={bell}
-                            size={100}
-                            opacity={0}
-                        />
-                    </Layout>
+                    <Txt
+                        ref={this.subText}
+                        text={"Подписаться"}
+                        fill={Colors.WHITE}
+                    />
+                    <Img   
+                        ref={this.bell}
+                        src={bell}
+                        size={0}
+                        opacity={0}
+                    />
                 </Rect>
             </Layout>
         )
     }
     public * subscribe() {
+        if (this.isSub()) {
+            return
+        }
         yield* all(
             this.subButton().fill(this.isSubColor, .5),
             this.subText().text(this.isSubText, .5),
             this.bell().opacity(1, .5),
+            this.bell().size(100, .5)
         )
+        this.isSub(true)
     }
     public * clickBell() {
+        if (!this.isSub()) {
+            return
+        }
         yield* all(
             chain(
                 this.bell().rotation(20, .5),
@@ -108,10 +114,15 @@ export class YoutubeCard extends Rect {
         )
     }
     public * unSubscribe() {
+        if (!this.isSub()) {
+            return
+        }
         yield* all(
             this.subButton().fill(this.notSubColor, .5),
             this.subText().text(this.notSubText, .5),
             this.bell().opacity(0, .5),
+            this.bell().size(0, .5)
         )
+        this.isSub(false)
     }
 }
