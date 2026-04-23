@@ -1,9 +1,11 @@
 import { Txt, TxtProps, View2D, Node } from "@motion-canvas/2d";
 import { loop, Random, Reference, SimpleSignal, ThreadGenerator, Vector2 } from "@motion-canvas/core";
 import { FastAverageColor, FastAverageColorResult } from "fast-average-color";
+import { Gitlab } from '@gitbeaker/rest';
 
-export function rescaleToFullHdFactor(view: View2D)
-{
+import { config } from "dotenv";
+
+export function rescaleToFullHdFactor(view: View2D) {
     return new Vector2(view.width() / 1920, view.height() / 1080)
 }
 
@@ -25,19 +27,10 @@ export function screenAppTimestampsToTimestamps(input: {
     })))
 }
 
-export function screenApp2TimestampsToTimestamps(input: {
-    speaker_id: number;
-    timestamp: number;
-    uuid: string;
-    text: (string | number)[][];
-    id: number;
-}[]) {
-    return input.map(s => s.text.map(t => ({
-        start: (t[0] as number),
-        end: (t[1] as number),
-        word: (t[3] as string)
-    })))
-}
+/**
+ * @deprecated use {@link screenAppTimestampsToTimestamps} instead
+ */
+export const screenApp2TimestampsToTimestamps = screenAppTimestampsToTimestamps
 
 export function getRandomElement<T>(array: T[], random?: Random): T {
     let randomIndex: number
@@ -61,12 +54,23 @@ export function randomMix<T>(array: T[], random?: Random): T[] {
 
 export const AverageColor = new FastAverageColor()
 
-export function* getAverageColorAsync(url : string)
-{
+export const TelegramBotToken = import.meta.env.VITE_TELEGRAM_BOT_TOKEN
+
+export const gitlab = new Gitlab({
+    host: import.meta.env.VITE_GITLAB_HOST,
+    token: import.meta.env.VITE_GITLAB_TOKEN
+})
+
+export const iconFont = "Material Symbols Outlined"
+
+export function* getAverageColorAsync(url: string) {
     const a = (yield AverageColor.getColorAsync(url)) as FastAverageColorResult
     return a
 }
 
+/**
+ * @deprecated use "black" or "white"
+ */
 export enum Colors {
     BLACK = "#000000ff",
     WHITE = "#ffffffff"
@@ -95,7 +99,8 @@ export function remark(view: View2D, props?: TxtProps) {
 export function* animateClone<T extends Node>(
     scene: Node,
     node: T,
-    callback: (clone: T) => ThreadGenerator
+    callback: (clone: T) => ThreadGenerator,
+    isOriginalNodeVisibleOnFinish: boolean = true
 ) {
     const clone = node.clone();
     scene.add(clone);
@@ -105,20 +110,20 @@ export function* animateClone<T extends Node>(
     yield* callback(clone);
 
     clone.remove();
-    node.opacity(1);
+    node.opacity(isOriginalNodeVisibleOnFinish ? 1 : 0);
 }
 
-export function* shaking(intensity: number, component: Reference<Node>, duration: number = 0.8, shakeCount: number = 8) {
+export function* shaking<T extends Node>(intensity: number, component: Reference<T>, duration: number = 0.8, shakeCount: number = 8) {
     const originalPosition = component().position();
     const shakeDuration = duration / shakeCount;
-    
+
     yield* loop(shakeCount, function* (i) {
         const decay = 1 - (i / shakeCount);
         const offsetX = (i % 2 === 0 ? 1 : -1) * intensity * decay;
         const offsetY = (i % 3 === 0 ? 1 : -1) * intensity * decay * 0.7;
         yield* component().position(originalPosition.add(new Vector2(offsetX, offsetY)), shakeDuration);
     });
-    
+
     // Возвращаем в исходное положение
     yield* component().position(originalPosition, shakeDuration);
 }

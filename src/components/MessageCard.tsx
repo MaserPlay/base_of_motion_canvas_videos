@@ -8,7 +8,7 @@ export type Reactions = Map<string, number> | [string, number][]
 export interface MessageCardProps extends LayoutProps {
     text: SignalValue<string>;
     author?: SignalValue<string>;
-    image?: SignalValue<string>;
+    icon?: SignalValue<string>;
     addImage?: SignalValue<string>;
     addImageOpacity?: SignalValue<number>;
     fill?: SignalValue<PossibleCanvasStyle>
@@ -56,7 +56,7 @@ export class MessageCard extends Layout {
 
     @initial("")
     @signal()
-    public declare readonly image: SimpleSignal<string, this>;
+    public declare readonly icon: SimpleSignal<string, this>;
 
     @initial("")
     @signal()
@@ -93,9 +93,9 @@ export class MessageCard extends Layout {
 
         const colors = ["#4f0396", "#ea868f", "#75b798", "#00a396"]
 
-        if (authorsColor.has(authorNickname))
+        if (authorNickname != undefined && authorNickname != null && authorsColor.has(authorNickname))
         {
-            return authorsColor.get(authorNickname)
+            return authorsColor.get(authorNickname)!!
         } else {
             const color = getRandomElement(colors, random)
             if (!(authorNickname == undefined || authorNickname == null)) {
@@ -112,10 +112,10 @@ export class MessageCard extends Layout {
         };
     }
 
-    public constructor(props?: MessageCardProps) {
+    public constructor(props: MessageCardProps) {
 
-        props.fontSize = props.fontSize ?? 30
-        props.lineHeight = props.lineHeight ?? 30
+        props.fontSize ??= 30
+        props.lineHeight ??= 30
         props.layout = true
         props.gap = 20
         props.alignItems = 'end'
@@ -129,9 +129,10 @@ export class MessageCard extends Layout {
         this.add(
             <>
                 <Img
-                    src={this.image}
+                    src={this.icon}
+                    radius={999}
                     size={() => {
-                        var isVisible = this.image().length != 0
+                        var isVisible = this.icon().length != 0
                         isVisible = isVisible && this.side() == MessageCard_Side.Left
                         return isVisible ? 150 : 0
                     }}
@@ -142,6 +143,12 @@ export class MessageCard extends Layout {
                     direction={'column'}
                     gap={10}
                 >
+                    <Img
+                        src={this.addImage}
+                        width={'100%'}
+                        opacity={this.addImageOpacity}
+                        radius={40}
+                    />
                     <Rect
                         layout
                         fill={this.fill}
@@ -153,7 +160,7 @@ export class MessageCard extends Layout {
                             text={this.author}
                             fontFamily={ffontFamily}
                             fill={this.authorNicknameColor()}
-                            fontSize={50}
+                            fontSize={40}
                         />
                         <Txt
                             text={() => insertLineBreaksPreserveWords(this.text(), this.lineLenght())}
@@ -161,7 +168,7 @@ export class MessageCard extends Layout {
                             fontFamily={ffontFamily}
                             fill={BrandColors.FontColor}
                             fontSize={() => this.text().trim().length == 0 ? 0 : this.fontSize()}
-                            margin={() => this.text().trim().length == 0 ? 0 : [this.author().trim().length == 0 ? 0 : 40, 0, 0, 0]}
+                            margin={() => this.text().trim().length == 0 ? 0 : [this.author().trim().length == 0 ? 0 : 20, 0, 0, 0]}
                         />
                         <Layout
                             layout
@@ -185,16 +192,11 @@ export class MessageCard extends Layout {
                             textAlign={"center"}
                         />
                     </Rect>
-                    <Img
-                        src={this.addImage}
-                        width={300}
-                        opacity={this.addImageOpacity}
-                    />
                 </Layout>
                 <Img
-                    src={this.image}
+                    src={this.icon}
                     size={() => {
-                        var isVisible = this.image().length != 0
+                        var isVisible = this.icon().length != 0
                         isVisible = isVisible && this.side() == MessageCard_Side.Right
                         return isVisible ? 150 : 0
                     }}

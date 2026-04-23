@@ -1,8 +1,11 @@
-import { Img, initial, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
+import { Img, initial, invert, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
 import { all, chain, createRef, SignalValue, SimpleSignal } from "@motion-canvas/core";
 import { Colors } from "../global";
 
-import bell from "../img/bell.svg"
+const bell = "https://raw.githubusercontent.com/google/material-design-icons/master/png/social/notifications/materialiconsoutlined/48dp/2x/outline_notifications_black_48dp.png"
+
+// or data uri
+// const bell = "data:image/svg+xml;utf8,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20height=%2224%22%20viewBox=%220%200%2024%2024%22%20width=%2224%22%3E%3Cpath%20d=%22M0%200h24v24H0V0z%22%20fill=%22none%22/%3E%3Cpath%20d=%22M12%2022c1.1%200%202-.9%202-2h-4c0%201.1.9%202%202%202zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5%201.5v.68C7.64%205.36%206%207.92%206%2011v5l-2%202v1h16v-1l-2-2zm-2%201H8v-6c0-2.48%201.51-4.5%204-4.5s4%202.02%204%204.5v6z%22/%3E%3C/svg%3E"
 
 export interface YoutubeCardProps extends RectProps {
     channelname: SignalValue<string>;
@@ -22,18 +25,18 @@ export class YoutubeCard extends Rect {
     @signal()
     private declare readonly isSub: SimpleSignal<boolean, this>;
 
-    readonly isSubColor = "#a1a1a1ff"
-    readonly notSubColor = "#ff3535ff"
+    private readonly isSubColor = "#a1a1a1ff"
+    private readonly notSubColor = "#ff3535ff"
     
-    readonly isSubText = "Подписан"
-    readonly notSubText = "Подписаться"
+    private readonly isSubText = "Подписан"
+    private readonly notSubText = "Подписаться"
 
-    readonly subButton = createRef<Rect>();
-    readonly subLayout = createRef<Layout>();
-    readonly subText = createRef<Txt>();
-    readonly bell = createRef<Img>();
+    private readonly subButton = createRef<Rect>();
+    private readonly subLayout = createRef<Layout>();
+    private readonly subText = createRef<Txt>();
+    private readonly bell = createRef<Img>();
 
-    public constructor(props?: YoutubeCardProps) {
+    public constructor(props: YoutubeCardProps) {
 
         props.layout = true
         props.fill = Colors.WHITE
@@ -80,6 +83,7 @@ export class YoutubeCard extends Rect {
                         src={bell}
                         size={0}
                         opacity={0}
+                        filters={[invert(1)]}
                     />
                 </Rect>
             </Layout>

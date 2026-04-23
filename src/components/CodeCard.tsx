@@ -25,23 +25,21 @@ export class CodeCard extends Rect {
     @signal()
     public declare readonly codeFontSize: SimpleSignal<number, this>;
 
-    public constructor(props?: CodeCardProps) {
+    public constructor(props: CodeCardProps) {
 
         props.radius ??= 18
         props.padding ??= 20
         props.fill ??= "#161616ff"
         props.layout ??= true
 
-        super({
-            ...props,
-        });
+        super(props);
 
 
         this.add(
             <Code
-                code={this.code}
-                highlighter={this.highlighter}
-                fontSize={this.codeFontSize}
+                code={() => this.code()}
+                highlighter={() => this.highlighter()}
+                fontSize={() => this.codeFontSize()}
             />
         )
     }

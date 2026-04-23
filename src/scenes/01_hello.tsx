@@ -1,15 +1,14 @@
-import { Img, Layout, makeScene2D, Txt } from "@motion-canvas/2d";
-import { createRef, waitUntil } from "@motion-canvas/core";
-import { addBackgroundVoronoi } from "../components/BackgroundVoronoi";
-import { BrandColors, rescaleToFullHdFactor, ResourceUrls } from "../global";
+import { Img, Layout, makeScene2D } from "@motion-canvas/2d";
+import { createRef, easeOutElastic, useDuration, waitUntil } from "@motion-canvas/core";
+import { BrandColors, ResourceUrls } from "../global";
+
 
 export default makeScene2D(function* (view) {
 
     const layout = createRef<Layout>()
-    const tittle = createRef<Txt>()
     const logo = createRef<Img>()
 
-    addBackgroundVoronoi(view)
+    view.fill(BrandColors.Background)
 
     view.add(
         <>
@@ -18,23 +17,21 @@ export default makeScene2D(function* (view) {
                 ref={layout}
                 direction={'column'}
                 alignItems={"center"}
-                scale={() => rescaleToFullHdFactor(view)}
                 gap={10}
             >
                 <Img
                     ref={logo}
                     src={ResourceUrls.maserplayIco}
-                />
-                <Txt
-                    ref={tittle}
-                    text={""}
-                    fill={BrandColors.FontColor}
-                    fontSize={200}
+                    scale={.1}
+                    shadowBlur={300}
+                    shadowColor={BrandColors.Primary}
                 />
             </Layout>
         </>
     )
-    
+
+    yield logo().scale(3, useDuration("hello"), easeOutElastic);
+
     yield* waitUntil("NextScene");
 
 });

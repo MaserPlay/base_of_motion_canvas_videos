@@ -1,0 +1,1 @@
+python.exe .\bigFile\bigfile.py %*

@@ -10,15 +10,17 @@ export interface YoutubeCommentsProps extends RectProps {
 
 export class YoutubeComments extends Rect {
 
+    @initial("")
     @signal()
     @initial("Очень крутой комментарий")
     public declare readonly placeholderText: SimpleSignal<string, this>;
     
+    @initial([] as string[])
     @signal()
     @initial(["Очень крутой комментарий", "Комментарий сомнительного содержания"])
     public declare readonly comments: SimpleSignal<string[], this>;
 
-    public constructor(props?: YoutubeCommentsProps) {
+    public constructor(props: YoutubeCommentsProps) {
 
         props.layout = true
         props.direction = 'column'

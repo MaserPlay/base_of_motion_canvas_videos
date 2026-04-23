@@ -9,6 +9,7 @@ dist
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
+!.vscode/makeScene2d.code-snippets
 .idea
 .DS_Store
 *.suo
@@ -16,3 +17,4 @@ dist
 *.njsproj
 *.sln
 *.sw?
+.env
