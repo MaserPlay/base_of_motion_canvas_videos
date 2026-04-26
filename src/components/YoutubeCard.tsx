@@ -1,6 +1,5 @@
 import { Img, initial, invert, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
 import { all, chain, createRef, SignalValue, SimpleSignal } from "@motion-canvas/core";
-import { Colors } from "../global";
 
 const bell = "https://raw.githubusercontent.com/google/material-design-icons/master/png/social/notifications/materialiconsoutlined/48dp/2x/outline_notifications_black_48dp.png"
 
@@ -39,7 +38,7 @@ export class YoutubeCard extends Rect {
     public constructor(props: YoutubeCardProps) {
 
         props.layout = true
-        props.fill = Colors.WHITE
+        props.fill = 'white'
         props.radius = 50
         props.padding = 30
 
@@ -76,7 +75,7 @@ export class YoutubeCard extends Rect {
                     <Txt
                         ref={this.subText}
                         text={"Подписаться"}
-                        fill={Colors.WHITE}
+                        fill={'white'}
                     />
                     <Img   
                         ref={this.bell}

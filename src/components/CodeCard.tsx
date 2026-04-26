@@ -21,7 +21,7 @@ export class CodeCard extends Rect {
     @signal()
     public declare readonly code: SimpleSignal<PossibleCodeScope, this>;
 
-    @defaultStyle('font-size', parseFloat)
+    @initial(40)
     @signal()
     public declare readonly codeFontSize: SimpleSignal<number, this>;
 

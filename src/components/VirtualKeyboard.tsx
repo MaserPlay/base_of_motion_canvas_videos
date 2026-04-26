@@ -22,7 +22,7 @@ import {
     useThread,
 } from "@motion-canvas/core";
 
-import { BrandColors } from "../global";
+import { BrandColors, iconFont } from "../global";
 
 export interface VirtualKeyboardProps extends ImgProps {
     selectedLetter?: SignalValue<string | null>;
@@ -89,7 +89,7 @@ export class VirtualKeyboard extends Img {
                                             }}
                                             width={l == " " ? letterWidth * 6 : letterWidth}
                                             height={letterHeight}
-                                            fill={() => (this.selectedLetter() == l) ? (BrandColors.Secondary) : (BrandColors.Secondary + "90")}
+                                            fill={() => (this.selectedLetter() == l) ? (BrandColors.Secondary) : (BrandColors.Secondary.alpha(90))}
                                             radius={10}
                                             grow={1}
                                             layout
@@ -101,7 +101,7 @@ export class VirtualKeyboard extends Img {
                                             <Txt
                                                 text={l}
                                                 fill={BrandColors.FontColor}
-                                                fontFamily={"Material Symbols Outlined"}
+                                                fontFamily={iconFont}
                                             />
                                         </Rect>
                                     ))

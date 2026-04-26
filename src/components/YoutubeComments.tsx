@@ -1,6 +1,5 @@
 import { Img, initial, Layout, Rect, RectProps, signal, Txt } from "@motion-canvas/2d";
 import { SignalValue, SimpleSignal } from "@motion-canvas/core";
-import { Colors } from "../global";
 import { insertLineBreaksPreserveWords, MessageCard } from "./MessageCard";
 
 export interface YoutubeCommentsProps extends RectProps {
@@ -24,7 +23,7 @@ export class YoutubeComments extends Rect {
 
         props.layout = true
         props.direction = 'column'
-        props.fill = Colors.WHITE
+        props.fill = 'white'
         props.offsetY = -1
         props.radius = 30
         props.padding = 20

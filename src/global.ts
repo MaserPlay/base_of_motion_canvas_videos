@@ -1,5 +1,6 @@
 import { Txt, TxtProps, View2D, Node } from "@motion-canvas/2d";
-import { loop, Random, Reference, ThreadGenerator, Vector2 } from "@motion-canvas/core";
+import { Color, loop, PossibleColor, Random, Reference, ThreadGenerator, useRandom, Vector2 } from "@motion-canvas/core";
+import { MessageCard } from "./components/MessageCard";
 
 
 /**
@@ -82,26 +83,85 @@ export function randomMix<T>(array: T[], random?: Random): T[] {
  */
 export const iconFont = "Material Symbols Outlined"
 
-/**
- * Перечисление основных цветов.
- * @deprecated use "black" or "white"
- */
-export enum Colors {
-    BLACK = "#000000ff",
-    WHITE = "#ffffffff"
-}
-
 export const BrandColors = {
-    Background: "hsl(210, 11%, 8%)",
-    FontColor: Colors.WHITE,
-    Primary: "#0d6efd",
-    Secondary: "#6c757d",
-    Accent: "#56ff3fff"
+    Background: new Color("hsl(210, 11%, 8%)"),
+    FontColor: new Color('white'),
+    Primary: new Color("#0d6efd"),
+    Secondary: new Color("#6c757d"),
+    Accent: new Color("#56ff3fff")
 }
 
 export const ResourceUrls = {
     maserplayIco: "https://avatars.githubusercontent.com/u/88372261?v=4",
     dadIco: "https://gitlab.m2023.ru/uploads/-/system/user/avatar/1/avatar.png?width=400"
+}
+
+var authorsColor = new Map<string, PossibleColor>()
+
+export const userIcon = (name:string, color?: PossibleColor) => {
+
+    let hexColor; 
+    if (color == undefined) {
+        hexColor = new Color(telegramAuthorsColor(name)).hex()
+    } else if (color instanceof Color) {
+        hexColor = color.hex()
+    } else {
+        hexColor = new Color(color).hex()
+    }
+    hexColor = hexColor.substring(1)
+
+    return `https://ui-avatars.com/api/?background=${hexColor}&size=512&color=fff&name=${encodeURIComponent(name)}&rounded=true&format=svg`;
+}
+
+export const telegramAuthorsColor = (authorNickname?: string) => {
+    const random = useRandom()
+
+    const colors : PossibleColor[] = ["#4f0396", "#ea868f", "#75b798", "#00a396"]
+
+    if (authorNickname != undefined && authorNickname != null && authorsColor.has(authorNickname))
+    {
+        return authorsColor.get(authorNickname)!!
+    } else {
+        const color = getRandomElement(colors, random)
+        if (!(authorNickname == undefined || authorNickname == null)) {
+            authorsColor.set(authorNickname, color)
+        }
+        return color
+    }
+} 
+
+
+export function insertLineBreaksPreserveWords(text: string, lineLength: number = 25, transferOverflow = true): string {
+    let result = '';
+
+    for (const line of text.trim().split("\n")) {
+        let currentlineLenght = 0;
+
+        for (const word of line.trim().split(" ")) {
+            if (transferOverflow && word.length > lineLength) {
+                if (currentlineLenght > 0) {
+                    result += "\n"
+                }
+                for (let start = 0; start < word.length; start = start + lineLength) {
+                    result += word.substring(start, start + lineLength)
+                    result += "\n"
+                }
+                currentlineLenght = 0
+            }
+            else if (currentlineLenght + word.length > lineLength) {
+                result += "\n"
+                currentlineLenght = 0
+                currentlineLenght += word.length + 1
+                result += word + " "
+            } else {                
+                currentlineLenght += word.length + 1
+                result += word + " "
+            }
+        }
+        result += "\n"
+    }
+
+    return result;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { Filter, filtersSignal, FiltersSignal, Img, initial, invert, Layout, LayoutProps, PossibleCanvasStyle, Rect, signal, Txt } from "@motion-canvas/2d";
-import { createDeferredEffect, createEffect, createRef, range, SignalValue, SimpleSignal, unwrap, useLogger, useRandom } from "@motion-canvas/core";
+import { createDeferredEffect, createRef, SignalValue, SimpleSignal, useLogger, useRandom } from "@motion-canvas/core";
 
-import { BrandColors, getRandomElement, ResourceUrls } from "../global"
+import { BrandColors, getRandomElement, insertLineBreaksPreserveWords, ResourceUrls, userIcon } from "../global"
 
 export type Reactions = Map<string, number> | [string, number][]
 
@@ -14,13 +14,12 @@ export interface MessageCardProps extends LayoutProps {
     fill?: SignalValue<PossibleCanvasStyle>
     authorNicknameColor?: SignalValue<PossibleCanvasStyle>
     lineLenght?: SignalValue<number>
-    imageFilters?: SignalValue<Filter[]>
+    iconFilters?: SignalValue<Filter[]>
     side?: SignalValue<MessageCard_Side>
     inline?: SignalValue<string>
     reactions?: SignalValue<Reactions>
 }
 
-let authorsColor = new Map<string, string>()
 export enum MessageCard_Side {
   Left,
   Right,
@@ -67,7 +66,7 @@ export class MessageCard extends Layout {
     public declare readonly addImageOpacity: SimpleSignal<number, this>;
 
     @filtersSignal()
-    public declare readonly imageFilters: FiltersSignal<this>;
+    public declare readonly iconFilters: FiltersSignal<this>;
 
     @initial(BrandColors.Primary)
     @signal()
@@ -77,38 +76,21 @@ export class MessageCard extends Layout {
     @signal()
     public declare readonly authorNicknameColor: SimpleSignal<PossibleCanvasStyle, this>;
 
-    static user = {
+    static user : Partial<MessageCardProps> = {
         author:"Пользователь",
-        image:"https://cdn-icons-png.flaticon.com/512/10412/10412528.png",
-        imageFilters:[invert(1)]
+        icon:"https://cdn-icons-png.flaticon.com/512/10412/10412528.png",
+        iconFilters:[invert(1)]
     };
 
-    static maserplay = {
+    static maserplay : Partial<MessageCardProps> = {
         author:"MaserPlay",
-        image:ResourceUrls.maserplayIco
+        icon:ResourceUrls.maserplayIco
     };
 
-    static telegramAuthorsColor = (authorNickname?: string) => {
-        const random = useRandom()
-
-        const colors = ["#4f0396", "#ea868f", "#75b798", "#00a396"]
-
-        if (authorNickname != undefined && authorNickname != null && authorsColor.has(authorNickname))
-        {
-            return authorsColor.get(authorNickname)!!
-        } else {
-            const color = getRandomElement(colors, random)
-            if (!(authorNickname == undefined || authorNickname == null)) {
-                authorsColor.set(authorNickname, color)
-            }
-            return color
-        }
-    } 
-
-    static authorProps = (name:string) => {
+    static authorProps = (name:string) : Partial<MessageCardProps> => {
         return {
             author: name,
-            image: `https://ui-avatars.com/api/?background=${MessageCard.telegramAuthorsColor(name).substring(1)}&size=512&color=fff&name=${encodeURIComponent(name)}&rounded=true&format=svg`
+            icon: userIcon(name)
         };
     }
 
@@ -136,7 +118,7 @@ export class MessageCard extends Layout {
                         isVisible = isVisible && this.side() == MessageCard_Side.Left
                         return isVisible ? 150 : 0
                     }}
-                    filters={this.imageFilters}
+                    filters={this.iconFilters}
                 />
                 <Layout
                     layout
@@ -178,7 +160,7 @@ export class MessageCard extends Layout {
                     </Rect>
                     <Rect
                         layout
-                        fill={BrandColors.Secondary + "60"}
+                        fill={BrandColors.Secondary.alpha(60)}
                         radius={40}
                         direction={'column'}
                         gap={40}
@@ -200,7 +182,7 @@ export class MessageCard extends Layout {
                         isVisible = isVisible && this.side() == MessageCard_Side.Right
                         return isVisible ? 150 : 0
                     }}
-                    filters={this.imageFilters}
+                    filters={this.iconFilters}
                 />
             </>
         )
@@ -234,37 +216,4 @@ export class MessageCard extends Layout {
 
         })
     }
-}
-
-export function insertLineBreaksPreserveWords(text: string, lineLength: number = 25, transferOverflow = true): string {
-    let result = '';
-
-    for (const line of text.trim().split("\n")) {
-        let currentlineLenght = 0;
-
-        for (const word of line.trim().split(" ")) {
-            if (transferOverflow && word.length > lineLength) {
-                if (currentlineLenght > 0) {
-                    result += "\n"
-                }
-                for (let start = 0; start < word.length; start = start + lineLength) {
-                    result += word.substring(start, start + lineLength)
-                    result += "\n"
-                }
-                currentlineLenght = 0
-            }
-            else if (currentlineLenght + word.length > lineLength) {
-                result += "\n"
-                currentlineLenght = 0
-                currentlineLenght += word.length + 1
-                result += word + " "
-            } else {                
-                currentlineLenght += word.length + 1
-                result += word + " "
-            }
-        }
-        result += "\n"
-    }
-
-    return result;
 }
