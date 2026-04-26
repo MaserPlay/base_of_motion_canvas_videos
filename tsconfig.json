@@ -1,7 +1,8 @@
 {
   "compilerOptions": {
     "resolveJsonModule": true,
-    "lib": ["ES2024", "DOM"]
+    "ignoreDeprecations": "6.0",
+    "lib": ["ES2024", "DOM"],
   },
   "extends": "@motion-canvas/2d/tsconfig.project.json",
   "include": ["src"],

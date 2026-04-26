@@ -4,7 +4,7 @@ output
 dist
 
 # Dont ignore mergeImages.bat
-!**\output\project\mergeImages.bat
+!**/output/project/mergeImages.bat
 
 # Editor directories and files
 .vscode/*
@@ -18,3 +18,4 @@ dist
 *.sln
 *.sw?
 .env
+**/*.meta
